@@ -10,7 +10,6 @@ a.session_start_dt,
 a.site_country,
 a.ref_domain,
 case
-case
     when user_name_base64 like '%!%%' escape '!'
     then SUBSTR(user_name_base64,0,index(user_name_base64,'%'))
     when user_name_base64 like '%?%'
@@ -19,7 +18,10 @@ case
     then SUBSTR(user_name_base64,0,index(user_name_base64,'&'))
 else user_name_base64
 end as roken2,
-NVL(f.user_id,'NA') as user_name,
+case 
+	when a.soj_lndg_page_url like '%roken2=tf.%' then 'eBay Publishing'
+	else NVL(f.user_id,'NA')
+	end as user_name,
 --a.board_name,
 a.page_type,
 a.session_referrer,
@@ -33,7 +35,21 @@ dw_uc.uc_titl,
 dw_uc.uc_id,
 dw_users.user_slctd_id as guide_owner,
 b.clicks,
-c.shares
+c.shares,
+c.mail_share,
+c.facebook_share,
+c.twitter_share,
+c.pinterest_share,
+c.ebay_share,
+c.other_share
+/*case 
+when c.channel_id in(14,15) then 'Mail'
+when c.channel_id in(2) then 'Facebook'
+when c.channel_id in(3) then 'Twitter'
+when c.channel_id in(11) then 'Pinterest'
+when c.channel_id in(19) then 'eBay Talk'
+else 'Not Shared'
+end as Share_Channel*/
 from
 (
 select
@@ -165,7 +181,13 @@ left outer join
 select 
 guid,
 session_skey,
-count(*) as shares
+count(*) as shares,
+sum(case when channel_id in (14,15) then 1 else 0 end ) as mail_share,
+sum(case when channel_id in (2) then 1 else 0 end) as facebook_share,
+sum(case when channel_id in (3) then 1 else 0 end) as twitter_share,
+sum(case when channel_id in (11) then 1 else 0 end) as pinterest_share,
+sum(case when channel_id in (19) then 1 else 0 end) as ebay_share,
+sum(case when channel_id not in (2,3,11,19,14,15) then 1 else 0 end) as other_share
 from p_seo_meas_t.social_share_clicks
 where 1 =1 
 and url_txt like '%roken2=%'
