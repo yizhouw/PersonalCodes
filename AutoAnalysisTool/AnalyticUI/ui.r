@@ -16,28 +16,25 @@ shinyUI(pageWithSidebar(
                    'Single Quote'="'"),
                  'Double Quote') ,
     textInput("move","Moving Average",value=7),
-    textInput("sig_lvl","Significant Level",value=1.7),
+    textInput("sig_lvl","Significant Level",value=1.96),
     sliderInput("year_weight", "Past Year - Current Year Weight", 0, 100, value= 50,step=10)
-#     textInput("last_year","Last Year Weight",value=7),
-#     textInput("current_year","This Year Weight",value=1.96)
   ),
-#   sidebarPanel(
-#     checkboxInput('column', 'Column Name', TRUE)
-#   ),
+
   mainPanel(
     uiOutput("columns"),
     uiOutput("time"),
     uiOutput("filter"),
-#     uiOutput(textOutput("filters")[1]),
     
     uiOutput("opts"),
-    uiOutput("para"),
-#     textOutput('columns'),
-#     h3("Sum of selected measurement:"),
-#     textOutput('sum'),
+#     uiOutput("para"),
+
     h3("Anomaly Dates:"),
+    
     plotOutput('detection'),
     textOutput("AnomalyDates"),
+    uiOutput("calendar"),
+    uiOutput("analysis_type"),
+    tableOutput('analysis_result'),
     h3("QuickView of Dataset"),
     tableOutput('contents')
 

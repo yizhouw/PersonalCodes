@@ -61,7 +61,7 @@ shinyServer(function(input, output) {
     data <- import.csv(inFile$datapath)
     FilCol <- match(filt,names(data))
     Options <- as.vector(unique(data[,FilCol]))
-    print(length(filt))
+#     print(length(filt))
     selectizeInput("option",filt[1],Options,selected=NULL,multiple=TRUE)
 #     for(i in 1:length(filt)){
 # #       output$filters <- renderText({filt})
@@ -79,20 +79,7 @@ shinyServer(function(input, output) {
   })
   
   
-  
-  ######## Calculating the Sum of the Selected Measurement ################
-#   output$sum <- renderText({
-#     meas <- input$measurement
-#     if(is.null(meas)){return(NULL)}
-#     inFile <- input$file
-#     if (is.null(inFile)){return(NULL)}
-#     data <- import.csv(inFile$datapath)
-#     MeasCol <- match(meas,names(data))
-#     Sum <- sum(data[,MeasCol])
-#     Sum
-#   })
-  
-    
+
   ################## Detection Graph ##############
   output$detection <- renderPlot({
     ### Read Filter Options ###
@@ -121,14 +108,63 @@ shinyServer(function(input, output) {
     
     GMB <- pivot(data,MeasCol,"2012-01-01","2014-06-01",option,,)
     current_weight <- input$year_weight
-    current_weight <- current_weight/100
+    current_weight <- current_weight/100.0
     Anomaly <- tsoutliers(GMB,Moving_Ave,level=Sig_Lev,title=option,weight=current_weight)
     Dates <- paste(shQuote(Anomaly[[2]]), collapse=", ")
-    Anomaly <- Anomaly[1]
-    Anomaly
+    Anomaly_plot <- Anomaly[[1]]
+    Anomaly_plot
     output$AnomalyDates <- renderText({
       Dates
     })
+    output$analysis_datechoose <- renderUI({
+      date_list <- Anomaly[[2]]
+      if(is.null(date_list)){return (NULL)}
+      selectizeInput("analysis_date","Choose the Analysis Date",date_list,selected=NULL,multiple=FALSE)
+    })
+
+    output$calendar <- renderUI({
+      date_list <- Anomaly[[2]]
+      if(is.null(date_list)){return (NULL)}
+      dateInput("calendar", "Choose the Analysis Date", value = NULL, min = NULL,
+                max = NULL, format = "yyyy-mm-dd", startview = "month",
+                weekstart = 0, language = "en")
+    })
+    
+    output$analysis_type <- renderUI({
+      date_list <- Anomaly[[2]]
+      if(is.null(date_list)){return (NULL)}
+      radioButtons('analysis_type', 'Choose the Analysis Type',
+                   c("Channel",
+                     "Browser",
+                     "Both"),
+                   'Both')
+    })
+    output$analysis_result <- renderTable({
+      ana_result <- NULL
+      channelCol <- match("Channel",names(data))
+      channels <- as.vector(unique(data[,channelCol]))
+      browserCol <- match("browser",names(data))
+      browsers <- as.vector(unique(data[,browserCol]))
+      ana_type <- input$analysis_type
+      meas <- input$measurement
+      if(is.null(meas)){return(NULL)}
+      MeasCol <- match(meas,names(data))
+      date <- input$calendar
+      if(is.null(ana_type)){return (NULL)}
+      site <- input$option
+      if (ana_type == 'Channel'){
+        ana_result <- channelAnalyze(data,GMB,date,MeasCol,channels,site)
+      }
+      if (ana_type == 'Both'){
+        ana_result <- browser_channel_analysis(data,GMB,date,MeasCol,channels,browsers,site)
+      }
+      if (ana_type == 'Browser'){
+        ana_result <- browser_analysis(data,GMB,date,MeasCol,browsers,site)
+      }
+      print (ana_type)
+      head(ana_result,10)
+    })
+
   })
 
 })

@@ -71,7 +71,7 @@ movingAverage <- function(x, n, centered=TRUE) {
 
 
 ############################## Outlier Detection #######################
-tsoutliers <- function(data,mov_len,plot=TRUE,level = 0.7,title="Title",weight=0.5)
+tsoutliers <- function(data,mov_len,plot=TRUE,level = 1.96,title="Title",weight=0.5)
 {
   x <- data[,1]
   y <- movingAverage(data[,2],mov_len)
@@ -179,17 +179,22 @@ pivot <- function (dataset,meas,start,end,site=as.vector(unique(dataset[,2])),ch
 #####################  Correlation Calculation ####################
 
 Correlation <- function (dataset1,dataset2,time,window){
-  result <- data.frame()
+#   result <- data.frame()
   length <- floor((window-1)/2)
-  
-  for(i in 1:length(time)){
-    subset_1 <- subset(dataset1,session_date>=time[i]-length&session_date<=time[i]+length)
-    subset_2 <- subset(dataset2,session_date>=time[i]-length&session_date<=time[i]+length)
+  time <- as.Date(time, origin="1970-01-01")
+#   for(i in 1:length(time)){
+#     subset_1 <- subset(dataset1,session_date>=time[i]-length&session_date<=time[i]+length)
+#     subset_2 <- subset(dataset2,session_date>=time[i]-length&session_date<=time[i]+length)
+# #     GMB_US_FACEBOOK <- pivot(Social_GMB,6,time[1]-length,time[1]+length,"US","facebook")
+#     correlation <- cor(log(subset_1[,2]),log(subset_2[,2]))
+#     result <- rbind(result, data.frame(time=time[i],cor = correlation))
+# #     print (result)
+#   }
+  subset_1 <- subset(dataset1,session_date>=time-length&session_date<=time+length)
+  subset_2 <- subset(dataset2,session_date>=time-length&session_date<=time+length)
 #     GMB_US_FACEBOOK <- pivot(Social_GMB,6,time[1]-length,time[1]+length,"US","facebook")
-    correlation <- cor(log(subset_1[,2]),log(subset_2[,2]))
-    result <- rbind(result, data.frame(time=time[i],cor = correlation))
-#     print (result)
-  }
+  correlation <- cor(log(subset_1[,2]),log(subset_2[,2]))
+  result <-data.frame(time=time,cor = correlation)
 #   print (result)
   return(result)
 }
@@ -205,51 +210,65 @@ channel_analysis <- function(all_data,subset,time,measure){
     print(channels[i])
     GMB_US_CHL <- pivot(all_data,measure,"2012-01-01","2014-06-01","US",channels[i],)
 #     print("fusion completed!")
-    result <- Correlation(subset,GMB_US_CHL,US_Anomaly_date,7)
+    result <- Correlation(subset,GMB_US_CHL,time,7)
     correlation_matrix <- cbind(correlation_matrix,result[,2])
     colnames(correlation_matrix)[i+1] <- channels[i]
   }
-  print (correlation_matrix)
+  return (correlation_matrix)
 }
 
 
-browser_analysis <- function(all_data,subset,time,measure){
-  browsers <- as.vector(unique(all_data[,6]))
-  print(browsers)
-  correlation_matrix <- data.frame(time)
+browser_analysis <- function(all_data,subset,time,measure,browsers,site){
+  correlation_matrix <- data.frame()
   for(i in 1:length(browsers)){
-    print(browsers[i])
-    GMB_US_BROSR <- pivot(all_data,measure,"2012-01-01","2014-06-01","US",,browsers[i])
+#     print(browsers[i])
+    GMB_US_BROSR <- pivot(all_data,measure,"2012-01-01","2014-06-01",site,,browsers[i])
     #     print("fusion completed!")
-    result <- Correlation(subset,GMB_US_BROSR,US_Anomaly_date,7)
-    correlation_matrix <- cbind(correlation_matrix,result[,2])
-    colnames(correlation_matrix)[i+1] <- browsers[i]
+    result <- Correlation(subset,GMB_US_BROSR,time,7)
+    correlation_matrix <- rbind(correlation_matrix,data.frame(browsers[i],result[,2]))
+    
   }
-  print (correlation_matrix)
+  colnames(correlation_matrix) <- c("Browser","Correlation")
+  correlation_matrix <- correlation_matrix[order(-correlation_matrix[[2]]),]
+  return (correlation_matrix)
 }
 
 
 
-browser_channel_analysis <- function(all_data,subset,time,measure){
-  channels <- as.vector(unique(all_data[,3]))
-  browsers <- as.vector(unique(all_data[,6]))
-  correlation_matrix <- data.frame(time)
+browser_channel_analysis <- function(all_data,subset,time,measure,channels,browsers,site){
+#   channels <- as.vector(unique(all_data[,3]))
+#   browsers <- as.vector(unique(all_data[,6]))
+  correlation_matrix <- data.frame()
   for (i in 1:length(channels)){
     for (j in 1:length(browsers)){
-      name <- paste(channels[i],"-",browsers[j])
-      GMB_US_CROSS <- pivot(all_data,measure,"2012-01-01","2014-06-01","US",channels[i],browsers[j])
-      result <- Correlation(subset,GMB_US_CROSS,US_Anomaly_date,7)   
-      correlation_matrix <- cbind(correlation_matrix,result[,2])
-      colnames(correlation_matrix)[ncol(correlation_matrix)] <- name
+#       name <- paste(channels[i],"-",browsers[j])
+      GMB_US_CROSS <- pivot(all_data,measure,"2012-01-01","2014-06-01",site,channels[i],browsers[j])
+      result <- Correlation(subset,GMB_US_CROSS,time,7)   
+      correlation_matrix <- rbind(correlation_matrix,data.frame(channels[i],browsers[j],result[,2]))
+#       correlation_matrix <- cbind(correlation_matrix,result[,2])
+#       colnames(correlation_matrix)[ncol(correlation_matrix)] <- name
     }
   }
+  colnames(correlation_matrix) <- c("Channel","Browser","Correlation")
+  correlation_matrix <- correlation_matrix[order(-correlation_matrix[[3]]),]
   return (correlation_matrix)
 }
 
 
 
 
-
+channelAnalyze <- function(all_data,subset,time,measure,channels,site){
+  correlation_matrix <- data.frame()
+  for(i in 1:length(channels)){
+    print(channels[i])
+    GMB_US_CHL <- pivot(all_data,measure,"2012-01-01","2014-06-01",site,channels[i],)
+    result <- Correlation(subset,GMB_US_CHL,time,7)
+    correlation_matrix <- rbind(correlation_matrix,data.frame(channels[i],result[,2]))
+  }
+  colnames(correlation_matrix) <- c("Channel","Correlation")
+  correlation_matrix <- correlation_matrix[order(-correlation_matrix[[2]]),]
+  return (correlation_matrix)
+}
 
 
 
