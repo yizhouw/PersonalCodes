@@ -10,6 +10,7 @@ a.bbowa_session_start_dt,
 a.rfr_src,
 a.site_country,
 a.iGMB,
+a.new_return_buyer,
 case
     when user_name_base64 like '%!%%' escape '!'
     then SUBSTR(user_name_base64,0,index(user_name_base64,'%'))
@@ -98,7 +99,11 @@ case
 	*/
 olp_page_type,
 --valid_page_count,
-device_type_txt
+device_type_txt,
+case 
+    when buyer_type_cd in (0,1) then 1
+    else 0
+end as new_return_buyer
 --soj_lndg_page_url
 from P_SEO_MEAS_V.FREE_TRAFFIC_CNVRSN
 where 1=1

@@ -49,6 +49,9 @@ INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('Q2hyaXMgUGlyaWxsbw==',
 INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('QW5kcmV3IE1vcmluc2tp','ridestory','','ridestory');
 INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('Q2hyaXMgTWNDb25uZWxs','dailytekk_influencer','','dailytekk');
 INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('RW1pbHkgSGlsbA==','emiscollections','Emily Hill','emiscollections');
+INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('U3VtbWVyIFdhdGtpbnM=','greylikesweddings','Summer Watkins','greylikes');
+INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('RGV2b24gRHllcg==','devon_rachel','Devon Dyer','DevonRachel1');
+INSERT INTO P_SOCIAL_INFLUENCER_T.INFLUENCER_LIST VALUES('U2FzaGVlIENoYW5kcmFu','Sashee Chandran','Sashee Chandran','');
 
 
 

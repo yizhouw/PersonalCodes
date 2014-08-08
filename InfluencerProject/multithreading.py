@@ -72,8 +72,6 @@ print bucket
 
 
 
-
-# Multithreading 
 class ThreadWithReturnValue(Thread):
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs={}, Verbose=None):
