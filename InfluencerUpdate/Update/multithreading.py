@@ -7,7 +7,7 @@ import csv
 
 
 
-bucket_size = 5 ## the smaller the bucket size is, the faster the program will run. But make sure no more than 700 threads.
+bucket_size = 10 ## the smaller the bucket size is, the faster the program will run. But make sure no more than 700 threads.
 
 
 def find_between( s, first, last ):
@@ -60,20 +60,6 @@ def get_pin(q,pin_ids):
 
 
 
-pin_ids = []
-with open ("new_pin.txt") as source:
-    for line in source:
-        line = line.replace('\n','')
-        pin_ids.append(line)
-# print bucket
-
-bucket = len(pin_ids)/bucket_size + 1
-# print bucket
-
-# print pin_ids[0:2]
-
-
-
 
 # Multithreading 
 class ThreadWithReturnValue(Thread):
@@ -90,6 +76,19 @@ class ThreadWithReturnValue(Thread):
         return self._return
 
 def RunProgram():
+        
+    pin_ids = []
+    with open ("new_pin.txt") as source:
+        for line in source:
+            line = line.replace('\n','')
+            pin_ids.append(line)
+    # print bucket
+    
+    bucket = len(pin_ids)/bucket_size + 1
+    # print bucket
+    
+    # print pin_ids[0:2]
+
     q = Queue.Queue()
 
 
